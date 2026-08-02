@@ -84,6 +84,7 @@
       const canvas = $("game-canvas");
       HYD.Input = { keys: {}, dx: 0, dy: 0, mouseDown: false, firePressed: false };
       addEventListener("keydown", (e) => {
+        HYD.Audio.init();
         HYD.Input.keys[e.code] = true;
         if (e.code === "Space" || e.code === "Tab") e.preventDefault();
         if (this.mode === "playing" && !this.paused) {
@@ -102,6 +103,7 @@
         }
       });
       addEventListener("mousedown", (e) => {
+        HYD.Audio.init();
         if (document.pointerLockElement === canvas && this.mode === "playing" && !this.paused) {
           if (e.button === 0) {
             HYD.Input.firePressed = true;
@@ -145,6 +147,8 @@
 
     // ---------------- flow ----------------
     startFreePlay() {
+      HYD.Audio.init();
+      HYD.Audio.startMusic();
       this.mode = "playing";
       this.paused = false;
       this.gateShown = false;
@@ -420,9 +424,15 @@
         log("=== SMOKE TEST ===");
         HYD.Auth.logout();
         localStorage.removeItem("hydfps.progress.v1.smoke@test.dev");
+        try {
+          const accs = JSON.parse(localStorage.getItem("hydfps.accounts.v1") || "{}");
+          delete accs["smoke@test.dev"];
+          localStorage.setItem("hydfps.accounts.v1", JSON.stringify(accs));
+        } catch (e) {}
         check("three.js loaded", typeof THREE !== "undefined" && !!HYD.World.scene);
         this.startFreePlay();
         await sleep(150);
+        check("audio context created on start", !!HYD.Audio.ctx);
         check("freeplay started, tutorial active", HYD.Missions.current && HYD.Missions.current.id === "tutorial");
         const M = HYD.Missions;
         if (M.current && M.current.id === "tutorial") {

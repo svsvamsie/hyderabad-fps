@@ -30,8 +30,9 @@
     },
 
     // ---- primitives ----
-    _noise(dur, vol, filterFreq, type = "lowpass") {
-      if (!this.ctx || !this.sfxOn) return;
+    _noise(dur, vol, filterFreq, type = "lowpass", out) {
+      if (!this.ctx) return;
+      if (!out && !this.sfxOn) return;
       const ctx = this.ctx;
       const len = Math.max(1, Math.floor(ctx.sampleRate * dur));
       const buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -40,7 +41,7 @@
       const src = ctx.createBufferSource(); src.buffer = buf;
       const filt = ctx.createBiquadFilter(); filt.type = type; filt.frequency.value = filterFreq;
       const g = ctx.createGain(); g.gain.value = vol;
-      src.connect(filt); filt.connect(g); g.connect(this.sfxGain);
+      src.connect(filt); filt.connect(g); g.connect(out || this.sfxGain);
       src.start();
     },
 
@@ -104,6 +105,7 @@
 
     // ---- ambient music loop (drone + tabla-ish pattern) ----
     startMusic() {
+      this.init();
       if (!this.ctx || this.musicTimer) return;
       this.step = 0;
       const bpm = 84;
@@ -146,7 +148,7 @@
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(this.musicGain);
       o.start(t); o.stop(t + dur + 0.02);
-      this._noise(0.03, 0.05, 3000, "highpass");
+      this._noise(0.03, 0.05, 3000, "highpass", this.musicGain);
     },
 
     stopMusic() {
