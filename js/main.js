@@ -26,11 +26,13 @@
       this.renderer.setSize(innerWidth, innerHeight);
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 1.08;
       this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 600);
       HYD.camPos = new THREE.Vector3(0, 1.6, 20);
 
-      HYD.World.init(this.scene);
+      HYD.World.init(this.scene, this.renderer);
       HYD.Player.init(this.camera, this.scene);
       HYD.Missions.init();
       HYD.UI.init();
@@ -67,7 +69,6 @@
             clearInterval(iv);
             setTimeout(() => {
               $("#loading").classList.add("hidden");
-              HYD.Audio.startMusic();
               HYD.UI.show("menu");
               HYD.UI.updateAccountLine();
             }, 250);
@@ -84,7 +85,7 @@
       const canvas = $("game-canvas");
       HYD.Input = { keys: {}, dx: 0, dy: 0, mouseDown: false, firePressed: false };
       addEventListener("keydown", (e) => {
-        HYD.Audio.init();
+        HYD.Audio.ensure();
         HYD.Input.keys[e.code] = true;
         if (e.code === "Space" || e.code === "Tab") e.preventDefault();
         if (this.mode === "playing" && !this.paused) {
@@ -103,7 +104,7 @@
         }
       });
       addEventListener("mousedown", (e) => {
-        HYD.Audio.init();
+        HYD.Audio.ensure();
         if (document.pointerLockElement === canvas && this.mode === "playing" && !this.paused) {
           if (e.button === 0) {
             HYD.Input.firePressed = true;
@@ -147,8 +148,8 @@
 
     // ---------------- flow ----------------
     startFreePlay() {
-      HYD.Audio.init();
-      HYD.Audio.startMusic();
+      HYD.Audio.ensure();
+      HYD.Audio.switchTrack("game");
       this.mode = "playing";
       this.paused = false;
       this.gateShown = false;
@@ -254,6 +255,7 @@
       this.paused = false;
       if (document.pointerLockElement) document.exitPointerLock();
       HYD.Missions.clearAllEnemies();
+      HYD.Audio.switchTrack("menu");
       HYD.UI.show("menu");
       HYD.UI.showHUD(false);
       HYD.UI.updateAccountLine();
@@ -393,6 +395,8 @@
       if (this.mode === "playing" && !this.paused) {
         HYD.World.updateAutos(dt);
         HYD.World.updateNPCs(dt);
+        HYD.World.updateLights(dt, t);
+        HYD.World.updateDust(dt);
         const collected = HYD.World.updatePickups(dt);
         for (const kind of collected) HYD.Player.give(kind);
         HYD.Player.update(dt, HYD.Input);
@@ -414,6 +418,22 @@
       this.renderer.render(this.scene, this.camera);
     },
 
+    toggleMusic() {
+      this.settings.music = !this.settings.music;
+      HYD.Audio.setEnabled(this.settings.music, this.settings.sfx);
+      this.saveProgress();
+      HYD.UI.updateAudioLabels();
+      HYD.UI.toast(this.settings.music ? "Music on" : "Music muted", this.settings.music ? "good" : "warn");
+    },
+
+    toggleSfx() {
+      this.settings.sfx = !this.settings.sfx;
+      HYD.Audio.setEnabled(this.settings.music, this.settings.sfx);
+      this.saveProgress();
+      HYD.UI.updateAudioLabels();
+      HYD.UI.toast(this.settings.sfx ? "Sound effects on" : "Sound effects muted", this.settings.sfx ? "good" : "warn");
+    },
+
     // ---------------- smoke test ----------------
     async runSmoke() {
       const log = (s) => { $("#debug-out").textContent += s + "\n"; };
@@ -433,6 +453,9 @@
         this.startFreePlay();
         await sleep(150);
         check("audio context created on start", !!HYD.Audio.ctx);
+        check("soundtrack scheduler running", !!HYD.Audio.scheduler && HYD.Audio.track === "game");
+        check("scene has environment lighting", !!this.scene.environment);
+        check("tone mapping enabled", this.renderer.toneMapping !== THREE.NoToneMapping);
         check("freeplay started, tutorial active", HYD.Missions.current && HYD.Missions.current.id === "tutorial");
         const M = HYD.Missions;
         if (M.current && M.current.id === "tutorial") {

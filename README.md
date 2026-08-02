@@ -25,7 +25,7 @@ No build step, no dependencies to install — everything is local, including the
 | 1 / 2 | Pistol / AK-56 |
 | Shift | Sprint |
 | Space | Jump |
-| Esc | Pause (customise avatar, shop, rampage) |
+| Esc | Pause (customise avatar, audio, shop, rampage) |
 | P | Toggle god mode (debug) |
 
 ## Missions (Hyderabadi-flavoured)
@@ -46,6 +46,18 @@ Killing civilians raises a **wanted level** and brings khaki cops. Money (`₹`)
 - First-person shooting with hitscan bullets, tracers, muzzle flash, recoil, blood/spark particles, enemy HP bars and simple AI (chase / strafe / shoot with line-of-sight).
 - Radar, health/armour, objective markers, mission banners, kill feed, toasts.
 - Fully procedural audio (WebAudio): gunshots, auto horns, chai sizzle, tabla/tanpura-style ambient loop. No audio files needed.
+
+## Audio & soundtrack
+
+- **Two composed soundtracks** generated live with WebAudio — *Charminar Dusk* (menus: slow mystical drone + melody) and *Biryani Beat* (gameplay: driving tabla rhythm at 112 BPM). They crossfade automatically when you enter or leave a mission.
+- **City ambience bed**: a low traffic-hum loop with random auto honks, chai sizzles, bird calls and whistles.
+- Audio starts on your **first click or keypress** (browsers require a user gesture), and you can toggle **Music / SFX** from the pause menu — the setting is saved with your profile.
+
+## Visuals
+
+- PBR materials with a procedurally generated environment map (PMREM), filmic ACES tone mapping, a dynamic sky shader with sun + halo, drifting clouds and dust motes.
+- Procedural textures for roads (lane markings, tyre wear), sidewalks, dusty earth, plaster walls with weathered stains and **windows that light up at dusk**, plus shimmering water.
+- A slow **day → sunset lighting cycle** (about 8 minutes): the sun sinks, lamps and windows glow, and the sky and fog warm to dusk purple.
 
 ## Signup & saving
 

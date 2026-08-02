@@ -37,6 +37,8 @@
         if (!HYD.Game.smoke) document.getElementById("game-canvas").requestPointerLock();
       };
       $("btn-quit").onclick = () => HYD.Game.quitToMenu();
+      $("btn-music").onclick = () => HYD.Game.toggleMusic();
+      $("btn-sfx").onclick = () => HYD.Game.toggleSfx();
 
       // signup tabs
       document.querySelectorAll(".tab").forEach(tab => {
@@ -98,11 +100,18 @@
       const line = $("account-line");
       $("btn-signin").classList.toggle("hidden", signed);
       $("btn-signout").classList.toggle("hidden", !signed);
+      this.updateAudioLabels();
       if (signed) {
         line.textContent = "Signed in: " + email + " — progress auto-saves";
       } else {
         line.textContent = "Guest mode — progress is not saved";
       }
+    },
+
+    updateAudioLabels() {
+      const s = HYD.Game.settings;
+      $("btn-music").textContent = "Music: " + (s.music ? "ON ♪" : "OFF");
+      $("btn-sfx").textContent = "SFX: " + (s.sfx ? "ON" : "OFF");
     },
 
     // ---------------- HUD ----------------
