@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Hyderabad: Streets of the Nizam — 3D Open-World FPS</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b3d2e'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23f0b429'%3E%E2%99%AA%3C/text%3E%3C/svg%3E">
+  <meta name="description" content="An open-world 3D browser FPS set in the heart of Hyderabad — Charminar, biryani, autos and rowdies. Play free for 60 seconds, then sign in with email or Google to save your avatar and missions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="load-card">
+      <div class="load-emblem">☪</div>
+      <div class="load-title">HYDERABAD</div>
+      <div class="load-sub">STREETS OF THE NIZAM</div>
+      <div class="load-bar"><div id="load-fill"></div></div>
+      <div id="load-text">Summoning Charminar…</div>
+    </div>
+  </div>
+
+  <!-- Main menu -->
+  <div id="menu" class="screen">
+    <div class="menu-glow"></div>
+    <div class="menu-inner">
+      <div class="game-title">HYDERABAD</div>
+      <div class="game-sub">STREETS OF THE NIZAM</div>
+      <div class="tagline">Charminar → Hussain Sagar. Biryani, autos &amp; rowdies.</div>
+      <div id="account-line" class="account-line">Guest mode</div>
+      <div class="menu-buttons">
+        <button id="btn-start" class="btn btn-primary">▶ Start Free Play <span class="badge">60s</span></button>
+        <button id="btn-howto" class="btn">How to Play</button>
+        <button id="btn-shop" class="btn">Shop &amp; Elite Pass</button>
+        <button id="btn-signin" class="btn btn-ghost">Sign in with Email / Google</button>
+        <button id="btn-signout" class="btn btn-ghost hidden">Sign out</button>
+      </div>
+      <div class="ad-slot" id="ad-slot-menu">
+        <div class="ad-note">Ad space — connect Google AdSense (see README)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="objective-card">
+      <div id="obj-title">Mission</div>
+      <div id="obj-desc">Objective</div>
+      <div id="obj-count"></div>
+    </div>
+
+    <div id="top-right">
+      <div id="free-timer" class="hidden">FREE SESSION 1:00</div>
+      <div class="stat-row"><span class="stat-label">₹</span><span id="money">0</span></div>
+      <div class="stat-row"><span class="stat-label">Coins</span><span id="coins">0</span></div>
+      <div class="stat-row"><span class="stat-label">Kills</span><span id="kills">0</span></div>
+      <canvas id="radar" width="150" height="150"></canvas>
+      <div id="wanted" class="hidden">★</div>
+    </div>
+
+    <div id="bottom-left">
+      <div class="bar-row"><div class="bar-label">HP</div><div class="bar"><div id="health-fill"></div></div></div>
+      <div class="bar-row"><div class="bar-label">ARM</div><div class="bar"><div id="armor-fill"></div></div></div>
+    </div>
+
+    <div id="bottom-right">
+      <div id="weapon-name">Pistol</div>
+      <div id="ammo">12 / 96</div>
+    </div>
+
+    <div id="crosshair"><div class="ch-dot"></div></div>
+    <div id="hitmarker" class="hidden"></div>
+    <div id="vignette"></div>
+    <div id="feed"></div>
+    <div id="toasts"></div>
+    <div id="keys-hint">WASD Move · Shift Sprint · LMB Shoot · R Reload · 1/2 Weapon · E Pickup · Esc Pause</div>
+  </div>
+
+  <!-- Pause -->
+  <div id="pause" class="screen hidden">
+    <div class="panel">
+      <div class="panel-title">PAUSED</div>
+      <button id="btn-resume" class="btn btn-primary">Resume</button>
+      <button id="btn-customize" class="btn">Customise Avatar</button>
+      <button id="btn-rampage" class="btn">Rowdy Rampage (endless)</button>
+      <button id="btn-shop2" class="btn">Shop &amp; Elite Pass</button>
+      <button id="btn-howto2" class="btn">How to Play</button>
+      <button id="btn-quit" class="btn">Quit to Menu</button>
+    </div>
+  </div>
+
+  <!-- Mission banner -->
+  <div id="mission-banner" class="hidden">
+    <div id="mb-title"></div>
+    <div id="mb-desc"></div>
+  </div>
+
+  <!-- Signup modal -->
+  <div id="signup" class="screen hidden">
+    <div class="panel">
+      <div class="panel-title">FREE SESSION OVER</div>
+      <p class="panel-sub">Your 60-second guest ride is done. Sign in to keep your avatar, money and mission progress forever.</p>
+      <div class="tabs">
+        <button class="tab active" data-tab="signup-form">New Account</button>
+        <button class="tab" data-tab="login-form">Sign In</button>
+      </div>
+      <form id="signup-form" autocomplete="off">
+        <input id="su-name" type="text" placeholder="Callsign (e.g. Nizam_07)" maxlength="20">
+        <input id="su-email" type="email" placeholder="you@gmail.com / email" required>
+        <input id="su-pass" type="password" placeholder="Password (min 6 chars)" required>
+        <button type="submit" class="btn btn-primary">Create &amp; Save Progress</button>
+      </form>
+      <form id="login-form" class="hidden" autocomplete="off">
+        <input id="li-email" type="email" placeholder="you@gmail.com / email" required>
+        <input id="li-pass" type="password" placeholder="Password" required>
+        <button type="submit" class="btn btn-primary">Sign In</button>
+      </form>
+      <button id="btn-google" class="btn btn-google">Continue with Google</button>
+      <button id="btn-guest" class="btn btn-ghost">No thanks — keep playing as guest (progress won't be saved)</button>
+      <p class="micro-note">Demo build: credentials &amp; saves live on this device only. Full Google OAuth wiring is documented in README.</p>
+    </div>
+  </div>
+
+  <!-- Avatar customizer -->
+  <div id="customizer" class="screen hidden">
+    <div class="panel panel-wide">
+      <div class="panel-title">AVATAR ATELIER</div>
+      <div class="cz-grid">
+        <div>
+          <canvas id="avatar-preview" width="240" height="320"></canvas>
+          <div class="cz-coins">Coins: <span id="cz-coins">0</span> <span class="micro-note">(earn in missions or buy in Shop)</span></div>
+        </div>
+        <div class="cz-controls">
+          <label>Callsign <input id="cz-name" maxlength="20"></label>
+          <label>Outfit
+            <select id="cz-outfit">
+              <option value="pathani" data-price="0">Pathani Suit</option>
+              <option value="kurta" data-price="0">Kurta</option>
+              <option value="hoodie" data-price="0">Street Hoodie</option>
+              <option value="police" data-price="200">Khaki Cop (Elite / 200c)</option>
+              <option value="gold" data-price="500">Nizam Gold Pathani (500c)</option>
+            </select>
+          </label>
+          <label>Outfit colour <input type="color" id="cz-color" value="#1d6f42"></label>
+          <label>Skin tone
+            <select id="cz-skin">
+              <option value="#f1c27d">Fair</option>
+              <option value="#e0ac69" selected>Wheat</option>
+              <option value="#c68642">Dusky</option>
+              <option value="#8d5524">Deep</option>
+            </select>
+          </label>
+          <label>Headwear
+            <select id="cz-head">
+              <option value="none">None</option>
+              <option value="turban">Hyderabadi Turban</option>
+              <option value="topi">Rumi Topi</option>
+              <option value="dupatta">Dupatta Wrap</option>
+            </select>
+          </label>
+          <label>Accessory
+            <select id="cz-accessory">
+              <option value="none">None</option>
+              <option value="sunglasses">Sunglasses</option>
+              <option value="chain">Gold Chain</option>
+              <option value="earring">Nath (nose ring)</option>
+            </select>
+          </label>
+          <label>Weapon skin
+            <select id="cz-weapon">
+              <option value="classic">Classic Steel</option>
+              <option value="gold" data-price="300">Charminar Gold (300c)</option>
+              <option value="biryani" data-price="150">Biryani Brown (150c)</option>
+            </select>
+          </label>
+          <div class="cz-actions">
+            <button id="btn-save-avatar" class="btn btn-primary">Save Avatar</button>
+            <button id="btn-cancel-avatar" class="btn">Cancel</button>
+          </div>
+          <p class="micro-note" id="cz-prices"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shop -->
+  <div id="shop" class="screen hidden">
+    <div class="panel panel-wide">
+      <div class="panel-title">SHOP — CHAI BAZAAR</div>
+      <div class="shop-balance">₹ <span id="shop-money">0</span> · Coins <span id="shop-coins">0</span></div>
+      <div id="shop-items">
+        <div class="shop-item">
+          <div class="si-name">Elite Pass <span class="badge">ONE-TIME</span></div>
+          <div class="si-desc">Premium outfits + gold weapon skins unlocked, ad-free, +25% mission cash, daily bonus.</div>
+          <button class="btn btn-buy" data-plan="elite">₹199</button>
+        </div>
+        <div class="shop-item">
+          <div class="si-name">Chai-Coins 500</div>
+          <div class="si-desc">Spend on premium cosmetics.</div>
+          <button class="btn btn-buy" data-plan="coins500">₹49</button>
+        </div>
+        <div class="shop-item">
+          <div class="si-name">Chai-Coins 1200</div>
+          <div class="si-desc">Best value: 1,200 coins.</div>
+          <button class="btn btn-buy" data-plan="coins1200">₹99</button>
+        </div>
+        <div class="shop-item">
+          <div class="si-name">Chai-Coins 3000</div>
+          <div class="si-desc">Big spender pack: 3,000 coins.</div>
+          <button class="btn btn-buy" data-plan="coins3000">₹199</button>
+        </div>
+        <div class="shop-item">
+          <div class="si-name">Rewarded Ad</div>
+          <div class="si-desc">Watch an ad, earn ₹250 in-game cash.</div>
+          <button class="btn btn-buy" data-plan="watchad">Watch</button>
+        </div>
+      </div>
+      <div id="pay-status" class="micro-note"></div>
+      <div class="ad-slot" id="ad-slot-shop">
+        <div class="ad-note">Ad space — connect Google AdSense (see README)</div>
+      </div>
+      <button id="btn-shop-close" class="btn">Back</button>
+    </div>
+  </div>
+
+  <!-- How to play -->
+  <div id="howto" class="screen hidden">
+    <div class="panel panel-wide">
+      <div class="panel-title">HOW TO PLAY</div>
+      <div class="howto-grid">
+        <div><b>Move</b> — WASD · <b>Sprint</b> — Shift · <b>Jump</b> — Space</div>
+        <div><b>Look</b> — Mouse · <b>Shoot</b> — Left Click · <b>Reload</b> — R</div>
+        <div><b>Weapons</b> — 1 Pistol · 2 AK-56 (unlocks in mission 2)</div>
+        <div><b>Pick up</b> — E · <b>Pause</b> — Esc</div>
+        <div><b>Cash ₹</b> from missions &amp; kills. <b>Coins</b> for premium looks.</div>
+        <div>Killing civilians raises your <b>wanted</b> level — cops in khaki will hunt you.</div>
+      </div>
+      <p class="micro-note">Hyderabad is your oyster, Saar: Charminar maidan, biryani runs, auto chases and a showdown at Hussain Sagar. First 60 seconds are free — then sign in to keep everything.</p>
+      <button id="btn-howto-close" class="btn">Back</button>
+    </div>
+  </div>
+
+  <!-- Game over / mission complete -->
+  <div id="result" class="screen hidden">
+    <div class="panel">
+      <div id="result-title" class="panel-title">MISSION COMPLETE</div>
+      <div id="result-body"></div>
+      <button id="btn-result-ok" class="btn btn-primary">Continue</button>
+      <button id="btn-result-menu" class="btn">Main Menu</button>
+    </div>
+  </div>
+
+  <!-- Generic prompt -->
+  <div id="prompt" class="screen hidden">
+    <div class="panel">
+      <div id="prompt-title" class="panel-title">CONFIRM</div>
+      <div id="prompt-body"></div>
+      <div class="row">
+        <button id="prompt-ok" class="btn btn-primary">OK</button>
+        <button id="prompt-cancel" class="btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="debug-out" class="hidden"></div>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/missions.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/monetize.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "hyderabad-streets-of-the-nizam",
+  "version": "1.0.0",
+  "description": "Open-world 3D browser FPS set in Hyderabad: Charminar, biryani runs, auto chases, 60s free play then email/Google signup, avatar customisation and saved mission progress.",
+  "main": "index.html",
+  "scripts": {
+    "serve": "python3 -m http.server 8123",
+    "test": "node /tmp/hyd-cdp.js http://127.0.0.1:8123/?smoke=1 9336"
+  },
+  "keywords": ["game", "threejs", "fps", "hyderabad", "browser-game", "razorpay"],
+  "license": "MIT"
+}
